@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -euo pipefail
+
+DOCKER_LOGIN=$(aws ecr get-login --no-include-email)
+PASSWORD=$(echo "$DOCKER_LOGIN" | cut -d' ' -f6)
+REGISTRY=$(echo "$DOCKER_LOGIN" | cut -d' ' -f9 | sed "s/https:\\/\\///")
+
+docker run -it --rm \
+       -e CLAIR_ADDR="$BUILDKITE_PLUGIN_KLAR_CLAIR_ADDR" \
+       -e DOCKER_USER=AWS \
+       -e DOCKER_PASSWORD="$PASSWORD" \
+       healthforge/klar "$REGISTRY"/"$BUILDKITE_PLUGIN_KLAR_IMAGE"
